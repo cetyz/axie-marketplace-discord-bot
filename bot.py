@@ -201,22 +201,21 @@ async def set_alert(ctx, *, arg):
         elif key == 'morale':
             morale = list_val
             
-            
-    axies = get_axie_market_list(
-        size=5,
-        classes=classes,
-        parts=parts,
-        pureness=pureness,
-        breed_count=breed_count,
-        hp=hp,
-        skill=skill,
-        speed=speed,
-        morale=morale
-    )
-        
-    
     _alert = True
     while _alert:
+            
+        axies = get_axie_market_list(
+            size=5,
+            classes=classes,
+            parts=parts,
+            pureness=pureness,
+            breed_count=breed_count,
+            hp=hp,
+            skill=skill,
+            speed=speed,
+            morale=morale
+        )
+        
     
         for axie in axies:
             
@@ -258,7 +257,7 @@ async def set_alert(ctx, *, arg):
                 ((m.content == "stop_alert_"+alert_id) or (m.content.lower() == "stop_all_alerts"))
         
         try:
-            if await bot.wait_for('message', check=check, timeout=600):
+            if await bot.wait_for('message', check=check, timeout=1800):
                 _alert = False
                 await ctx.send("Stopping alert {}".format(alert_id))
         except asyncio.TimeoutError:
