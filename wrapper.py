@@ -100,23 +100,40 @@ def get_axie_market_list(
 
 # body = {"operationName":"GetAxieDetail","variables":{"axieId":"2245218"},"query":"query GetAxieDetail($axieId: ID!) {\n  axie(axieId: $axieId) {\n    ...AxieDetail\n    __typename\n  }\n}\n\nfragment AxieDetail on Axie {\n  id\n  image\n  class\n  chain\n  name\n  genes\n  owner\n  birthDate\n  bodyShape\n  class\n  sireId\n  sireClass\n  matronId\n  matronClass\n  stage\n  title\n  breedCount\n  level\n  figure {\n    atlas\n    model\n    image\n    __typename\n  }\n  parts {\n    ...AxiePart\n    __typename\n  }\n  stats {\n    ...AxieStats\n    __typename\n  }\n  auction {\n    ...AxieAuction\n    __typename\n  }\n  ownerProfile {\n    name\n    __typename\n  }\n  battleInfo {\n    ...AxieBattleInfo\n    __typename\n  }\n  children {\n    id\n    name\n    class\n    image\n    title\n    stage\n    __typename\n  }\n  __typename\n}\n\nfragment AxieBattleInfo on AxieBattleInfo {\n  banned\n  banUntil\n  level\n  __typename\n}\n\nfragment AxiePart on AxiePart {\n  id\n  name\n  class\n  type\n  specialGenes\n  stage\n  abilities {\n    ...AxieCardAbility\n    __typename\n  }\n  __typename\n}\n\nfragment AxieCardAbility on AxieCardAbility {\n  id\n  name\n  attack\n  defense\n  energy\n  description\n  backgroundUrl\n  effectIconUrl\n  __typename\n}\n\nfragment AxieStats on AxieStats {\n  hp\n  speed\n  skill\n  morale\n  __typename\n}\n\nfragment AxieAuction on Auction {\n  startingPrice\n  endingPrice\n  startingTimestamp\n  endingTimestamp\n  duration\n  timeLeft\n  currentPrice\n  currentPriceUSD\n  suggestedPrice\n  seller\n  listingIndex\n  state\n  __typename\n}\n"}
 
+def get_axie(axie_id=None):
+    if not axie_id:
+        raise ValueError('No Axie ID specified')
+    
+    body = {"operationName": "GetAxieDetail",
+            "variables": json.dumps({"axieId": str(axie_id)}),
+            "query": "query GetAxieDetail($axieId: ID!) {\n  axie(axieId: $axieId) {\n    ...AxieDetail\n    __typename\n  }\n}\n\nfragment AxieDetail on Axie {\n  id\n  image\n  class\n  chain\n  name\n  genes\n  owner\n  birthDate\n  bodyShape\n  class\n  sireId\n  sireClass\n  matronId\n  matronClass\n  stage\n  title\n  breedCount\n  level\n  figure {\n    atlas\n    model\n    image\n    __typename\n  }\n  parts {\n    ...AxiePart\n    __typename\n  }\n  stats {\n    ...AxieStats\n    __typename\n  }\n  auction {\n    ...AxieAuction\n    __typename\n  }\n  ownerProfile {\n    name\n    __typename\n  }\n  battleInfo {\n    ...AxieBattleInfo\n    __typename\n  }\n  children {\n    id\n    name\n    class\n    image\n    title\n    stage\n    __typename\n  }\n  __typename\n}\n\nfragment AxieBattleInfo on AxieBattleInfo {\n  banned\n  banUntil\n  level\n  __typename\n}\n\nfragment AxiePart on AxiePart {\n  id\n  name\n  class\n  type\n  specialGenes\n  stage\n  abilities {\n    ...AxieCardAbility\n    __typename\n  }\n  __typename\n}\n\nfragment AxieCardAbility on AxieCardAbility {\n  id\n  name\n  attack\n  defense\n  energy\n  description\n  backgroundUrl\n  effectIconUrl\n  __typename\n}\n\nfragment AxieStats on AxieStats {\n  hp\n  speed\n  skill\n  morale\n  __typename\n}\n\nfragment AxieAuction on Auction {\n  startingPrice\n  endingPrice\n  startingTimestamp\n  endingTimestamp\n  duration\n  timeLeft\n  currentPrice\n  currentPriceUSD\n  suggestedPrice\n  seller\n  listingIndex\n  state\n  __typename\n}\n"
+        }
 
+    response_text = r.post(url, data=body).text
+    data = json.loads(response_text)['data']['axie']
+    return(data)
 
 
 
 
 if __name__ == '__main__':
     
-    classes = ['Aquatic']
-    parts = ['tail-nimo', 'mouth-risky-fish', 'horn-dual-blade', 'horn-little-branch', 'horn-pocky', 'back-goldfish']
-    pureness = [5]
-    speed = [54, 55, 56, 57]
+    # classes = ['Aquatic']
+    # parts = ['tail-nimo', 'mouth-risky-fish', 'horn-dual-blade', 'horn-little-branch', 'horn-pocky', 'back-goldfish']
+    # pureness = [5]
+    # speed = [54, 55, 56, 57]
     
-    axies = get_axie_market_list(parts=parts, classes=classes, speed=speed)
+    # axies = get_axie_market_list(parts=parts, classes=classes, speed=speed)
     
-    for axie in axies:
-        print('ID:', axie['id'])
-        print('Price:', np.round(float(axie['auction']['currentPrice'])/10e18, 4))
-        print('USD:', axie['auction']['currentPriceUSD'])
-        print()
+    # for axie in axies:
+    #     print('ID:', axie['id'])
+    #     print('Price:', np.round(float(axie['auction']['currentPrice'])/10e18, 4))
+    #     print('USD:', axie['auction']['currentPriceUSD'])
+    #     print()
+    data = get_axie(axie_id=7793905)
+    # for i in data:
+    #     print(i, data[i], sep=': ')
+        
+    genes = data['genes']
     
+    print(genes)
