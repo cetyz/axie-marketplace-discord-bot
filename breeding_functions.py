@@ -60,7 +60,7 @@ def get_axie_price(axie_id):
         eth_price = np.round(int(results['auction']['currentPrice'])/10e18, 4)
         usd_price = np.round(float(results['auction']['currentPriceUSD']), 2)
 
-    return eth_price, usd_price
+    return usd_price, eth_price
     
 
 def get_expected_revenue(axie1_id, axie2_id, verbose=False, csv_out=False):
@@ -244,9 +244,9 @@ def get_expected_revenue(axie1_id, axie2_id, verbose=False, csv_out=False):
     
     revenue_df = combi_df[['combi_index', 'expected_eth', 'expected_usd']].groupby(['combi_index', 'expected_eth', 'expected_usd']).sum().reset_index()
     
-    expected_eth, expected_usd = revenue_df['expected_eth'].sum(), revenue_df['expected_usd'].sum()
+    expected_usd, expected_eth = np.round(revenue_df['expected_usd'].sum(), 2), np.round(revenue_df['expected_eth'].sum(), 4)
     
-    return(expected_eth, expected_usd)
+    return(expected_usd, expected_eth)
 
 
 

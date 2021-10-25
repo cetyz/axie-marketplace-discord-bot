@@ -139,7 +139,7 @@ if __name__ == '__main__':
     #     print('Price:', np.round(float(axie['auction']['currentPrice'])/10e18, 4))
     #     print('USD:', axie['auction']['currentPriceUSD'])
     #     print()
-    data = get_axie(axie_id=7793905)
+    data = get_axie(axie_id=7804038)
     # for i in data:
     #     print(i, data[i], sep=': ')
         
