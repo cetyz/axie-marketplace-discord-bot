@@ -93,8 +93,11 @@ def get_axie_market_list(
            }
 
     response_text = r.post(url, data=body).text
-    data = json.loads(response_text)
-    axies = data['data']['axies']['results']
+    try:
+        data = json.loads(response_text)
+        axies = data['data']['axies']['results']
+    except:
+        axies = []
     return(axies)
     
 

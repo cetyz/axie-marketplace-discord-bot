@@ -13,6 +13,24 @@ import itertools
 from wrapper import get_axie, get_axie_market_list
 from gene_functions import decode_genes
 
+def get_axie_price(axie_id):
+    
+    
+    # if axie is on sale, get current price in eth and usd
+    # if axie is not on sale, return nan
+    
+    results = get_axie(axie_id=axie_id)
+    if not results:
+        raise ValueError('Axie not found')
+    elif not results['auction']:
+        eth_price, usd_price = np.nan, np.nan
+    else:
+        eth_price = np.round(int(results['auction']['currentPrice'])/10e18, 4)
+        usd_price = np.round(float(results['auction']['currentPriceUSD']), 2)
+
+    return eth_price, usd_price
+    
+
 # inheritance probabilities for DOMINANT genes
 # dominant 37.5%
 # r1 9.375%
@@ -137,18 +155,22 @@ probs_df = pd.DataFrame(np.transpose([parts_list, probs_list]), columns=['part',
 combi_df = combi_df.merge(probs_df, how='left', on='part')
 combi_df['probs'] = combi_df['probs'].astype('float')
 
-# print(combi_df['probs'].astype('float').unique())
-
 probs_df_2 = combi_df[['combi_index', 'probs']].groupby('combi_index').prod().reset_index()
 
 combi_df = combi_df.merge(probs_df_2, how='left', on='combi_index').sort_values(['probs_y', 'combi_index'], ascending=[False, True])
 
 combi_df['req_name'] = combi_df['part_type'].str.lower() + '-' + combi_df['part'].str.replace(' ', '-').str.lower()
 
-# print(combi_df[['combi_index', 'probs_y']].groupby(['combi_index', 'probs_y']).sum().reset_index().sum())
+price_data = []
 
-temp_counter = 0
-for i in combi_df['combi_index'].unique().tolist():
+combis = len(combi_df['combi_index'].unique().tolist())
+
+for h, i in enumerate(combi_df['combi_index'].unique().tolist()):
+    
+    
+    
+    combi_data = [i]
+    
     parts = list(combi_df[combi_df['combi_index']==i]['req_name'].values)
     
     results = get_axie_market_list(
@@ -167,18 +189,36 @@ for i in combi_df['combi_index'].unique().tolist():
         morale = [],
     )
 
-    # print(int(results[0]['auction']['currentPrice'])/10e18)
-    try:
-        print(float(results[0]['auction']['currentPriceUSD']))
-    except:
-        pass
+    if not len(results):
+        combi_data.append(np.nan)
+        combi_data.append(np.nan)
     
-    temp_counter += 1
+    else:
+        combi_data.append(int(results[0]['auction']['currentPrice'])/10e18)
+        combi_data.append(np.round(float(results[0]['auction']['currentPriceUSD']), 2))
     
-    if temp_counter > 10:
-        break
+    price_data.append(combi_data)
+    
+    if (int((h+1)/combis) % 10) == 0:
+        print(h+1, '/', combis)
     
     time.sleep(0.01)
+    
+price_df = pd.DataFrame(data=price_data, columns=['combi_index', 'eth_price', 'usd_price'])
+
+combi_df = combi_df.merge(price_df, how='left', on='combi_index')
+combi_df['expected_eth'] = combi_df['probs_y'] * combi_df['eth_price'].fillna(combi_df['eth_price'].min())
+combi_df['expected_usd'] = combi_df['probs_y'] * combi_df['usd_price'].fillna(combi_df['usd_price'].min())
+
+revenue_df = combi_df[['combi_index', 'expected_eth', 'expected_usd']].groupby(['combi_index', 'expected_eth', 'expected_usd']).sum().reset_index()
+
+expected_eth, expected_usd = revenue_df['expected_eth'].sum(), revenue_df['expected_usd'].sum()
+
+print(expected_eth, expected_usd)
+
+# eth_price, usd_price = get_axie_price(7804038)
+
+# print(eth_price, usd_price)
 
 
 
