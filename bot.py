@@ -58,7 +58,7 @@ async def breed(ctx, *, arg):
     
     breeds = 1
     axie1_breeds, axie2_breeds = axie1_breed_count, axie2_breed_count
-    while (axie1_breeds < 7) or (axie2_breeds < 7):
+    while (axie1_breeds < 7) and (axie2_breeds < 7):
         usd_cost, eth_cost = get_breeding_cost(axie1_breeds, axie2_breeds)
         usd_cost, eth_cost = np.round(usd_cost, 2), np.round(eth_cost, 4)
         usd_rev, eth_rev = np.round(expected_usd, 2), np.round(expected_eth, 4)
