@@ -16,7 +16,8 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 
-from wrapper import get_axie_market_list
+from wrapper import get_axie_market_list, get_breed_count
+from breeding_functions import get_expected_revenue, get_breeding_cost
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -40,6 +41,65 @@ async def on_ready():
 #     def predicate(ctx):
 #         return 'CETYZ scholarship' in ctx.guilds
 #     return(commands.check(predicate))
+
+
+@bot.command(name='breed', help='To be filled in')
+async def breed(ctx, *, arg):
+    
+    ids = arg.split('|')
+    axie1_id = int(ids[0])
+    axie2_id = int(ids[1])
+    expected_usd, expected_eth = get_expected_revenue(axie1_id, axie2_id, True)
+    # expected_usd, expected_eth = 200, 0.05
+    axie1_breed_count = get_breed_count(axie1_id)
+    axie2_breed_count = get_breed_count(axie2_id)
+
+    output_str = 'Breeds | Axie 1 Breeds | Axie 2 Breeds | USD Cost | USD Rev | ETH Cost | ETH Rev'
+    
+    breeds = 1
+    axie1_breeds, axie2_breeds = axie1_breed_count, axie2_breed_count
+    while (axie1_breeds < 7) or (axie2_breeds < 7):
+        usd_cost, eth_cost = get_breeding_cost(axie1_breeds, axie2_breeds)
+        usd_rev, eth_rev = expected_usd * breeds, expected_eth * breeds
+        
+        built_str = '\n'+str(breeds)+' | '+str(axie1_breeds)+' | '+str(axie2_breeds)+' | '+str(usd_cost)+' | '+str(usd_rev)+' | '+str(eth_cost)+' | '+str(eth_rev)
+    
+        output_str += built_str
+        
+        axie1_breeds += 1
+        axie2_breeds += 1
+        breeds += 1
+
+
+        
+    embed = discord.Embed(
+        title='Breeding Predictions',
+        # description='Price: {}\nUSD: {}'.format(                    
+            # np.round(float(axie['auction']['currentPrice'])/10e18, 4),
+            # axie['auction']['currentPriceUSD']
+        # ),
+        # url='https://marketplace.axieinfinity.com/axie/'+axie['id']
+    )
+    # embed.set_image(url=axie['image'])
+    # embed.image.height=200
+    # embed.image.width=200
+    # embed.set_thumbnail(url=axie['image'])
+    
+    
+    
+    embed.add_field(name='Results', value=output_str)
+    
+    # embed.add_field(name='Back', value=axie['parts'][2]['name'])
+    # embed.add_field(name='Mouth', value=axie['parts'][3]['name'])
+    # embed.add_field(name = chr(173), value = chr(173))
+    # embed.add_field(name='Horn', value=axie['parts'][4]['name'])
+    # embed.add_field(name='Tail', value=axie['parts'][5]['name'])
+    # embed.add_field(name = chr(173), value = chr(173))
+    
+    await ctx.send(
+
+        embed=embed
+        )
 
 
 @bot.command(name='quick_search', help='To be filled in')

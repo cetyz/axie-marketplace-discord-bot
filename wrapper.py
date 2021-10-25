@@ -117,7 +117,13 @@ def get_axie(axie_id=None):
     return(data)
 
 
-
+def get_breed_count(axie_id=None):
+    if not axie_id:
+        raise ValueError('No Axie ID specified')
+        
+    results = get_axie(axie_id=axie_id)
+    
+    return(int(results['breedCount']))
 
 if __name__ == '__main__':
     
