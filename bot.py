@@ -45,6 +45,7 @@ async def on_ready():
 
 @bot.command(name='breed', help='To be filled in')
 async def breed(ctx, *, arg):
+       
     
     ids = arg.split('|')
     axie1_id = int(ids[0])

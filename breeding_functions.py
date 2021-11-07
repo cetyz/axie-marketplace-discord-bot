@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import itertools
 
-from wrapper import get_axie, get_axie_market_list, get_breed_count
+from wrapper import get_axie, get_axie_market_list, get_breed_count, get_axie_class
 from gene_functions import decode_genes
 from generic_functions import fetch_axs_price, fetch_slp_price
 
@@ -63,7 +63,7 @@ def get_axie_price(axie_id):
     return usd_price, eth_price
     
 
-def get_expected_revenue(axie1_id, axie2_id, verbose=False, csv_out=False):
+def get_expected_revenue(axie1_id, axie2_id, verbose=False, csv_out=True):
 
 # inheritance probabilities for DOMINANT genes
 # dominant 37.5%
@@ -76,6 +76,27 @@ def get_expected_revenue(axie1_id, axie2_id, verbose=False, csv_out=False):
 
 # axie1_id = 7793905
 # axie2_id = 7923772
+
+    # get floor axie price for "worst case scenarios"
+    # average of 10 floor axies
+    floor_axies = get_axie_market_list(size=10)
+    floor_axie_usd_list = []
+    floor_axie_eth_list = []
+    
+    for axie in floor_axies:
+        floor_axie_usd_list.append(float(axie['auction']['currentPriceUSD']))
+        floor_axie_eth_list.append(float(axie['auction']['currentPrice']))
+
+    floor_axie_usd = np.mean(floor_axie_usd_list)
+    floor_axie_eth = np.mean(floor_axie_eth_list)
+
+    axie1_class = get_axie_class(axie_id=axie1_id)
+    axie2_class = get_axie_class(axie_id=axie2_id)
+    
+    if axie1_class == axie2_class:
+        class_filter = axie1_class
+    else:
+        class_filter = axie1_class+'|'+axie2_class
 
     axie1_gene_str = get_axie(axie_id=axie1_id)['genes']
     axie2_gene_str = get_axie(axie_id=axie2_id)['genes']
@@ -191,7 +212,7 @@ def get_expected_revenue(axie1_id, axie2_id, verbose=False, csv_out=False):
     
     combis = len(combi_df['combi_index'].unique().tolist())
     
-    checkpoints = np.round(np.linspace(0, 800, num=20), 0)
+    checkpoints = np.round(np.linspace(0, combis, num=20), 0)
     
     print('Scanning the market for', combis, 'combinations')
     
@@ -211,7 +232,7 @@ def get_expected_revenue(axie1_id, axie2_id, verbose=False, csv_out=False):
             auction_type = 'Sale',
             owner = None,
             parts = parts,
-            classes = 'Plant',
+            classes = class_filter,
             stages = 4,
             pureness = None,
             breed_count = 0,
@@ -231,13 +252,13 @@ def get_expected_revenue(axie1_id, axie2_id, verbose=False, csv_out=False):
         
         price_data.append(combi_data)
         
-        time.sleep(0.01)
+        time.sleep(0.005)
         
     price_df = pd.DataFrame(data=price_data, columns=['combi_index', 'eth_price', 'usd_price'])
     
     combi_df = combi_df.merge(price_df, how='left', on='combi_index')
-    combi_df['expected_eth'] = combi_df['probs_y'] * combi_df['eth_price'].fillna(combi_df['eth_price'].min())
-    combi_df['expected_usd'] = combi_df['probs_y'] * combi_df['usd_price'].fillna(combi_df['usd_price'].min())
+    combi_df['expected_eth'] = combi_df['probs_y'] * combi_df['eth_price'].fillna(floor_axie_eth)
+    combi_df['expected_usd'] = combi_df['probs_y'] * combi_df['usd_price'].fillna(floor_axie_usd)
     
     if csv_out:
         combi_df.to_csv('out.csv', index=False)

@@ -125,6 +125,13 @@ def get_breed_count(axie_id=None):
     
     return(int(results['breedCount']))
 
+def get_axie_class(axie_id=None):
+    if not axie_id:
+        raise ValueError('No Axie ID specified')
+    
+    results = get_axie(axie_id=axie_id)
+    return(results['class'])
+
 if __name__ == '__main__':
     
     # classes = ['Aquatic']
@@ -139,10 +146,12 @@ if __name__ == '__main__':
     #     print('Price:', np.round(float(axie['auction']['currentPrice'])/10e18, 4))
     #     print('USD:', axie['auction']['currentPriceUSD'])
     #     print()
-    data = get_axie(axie_id=7804038)
+    # data = get_axie(axie_id=7804038)
     # for i in data:
     #     print(i, data[i], sep=': ')
         
-    genes = data['genes']
+    # genes = data['genes']
     
-    print(genes)
+    # print(genes)
+    
+    print(get_axie_class(axie_id=7804038))
