@@ -88,7 +88,7 @@ def get_expected_revenue(axie1_id, axie2_id, verbose=False, csv_out=True):
         floor_axie_eth_list.append(float(axie['auction']['currentPrice']))
 
     floor_axie_usd = np.mean(floor_axie_usd_list)
-    floor_axie_eth = np.mean(floor_axie_eth_list)
+    floor_axie_eth = np.round(np.mean(floor_axie_eth_list)/10e18, 4)
 
     axie1_class = get_axie_class(axie_id=axie1_id)
     axie2_class = get_axie_class(axie_id=axie2_id)
